@@ -18,7 +18,6 @@ exports.signIn = async (req, res) => {
       return res.status(422).json({ error: "Invalid email or password" });
     }
 
-    // Check the password using bcrypt
     bcrypt.compare(password, savedUser.password).then((doMatch) => {
       if (doMatch) {
         const token = jwt.sign({ _id: savedUser._id }, process.env.JWT_SECRET);
@@ -83,10 +82,8 @@ exports.updateRoleToUser = async (req, res) => {
 exports.createUser = async (req, res) => {
   const { name, email, password } = req.body;
 
-  // Regular expression to validate email format
   const emailRegex = /^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
 
-  // Check if the email and password are valid
   if (!emailRegex.test(email)) {
     return res.status(400).json({ error: "Invalid email format" });
   }
@@ -100,7 +97,10 @@ exports.createUser = async (req, res) => {
   try {
     const newUser = new User({ name, email, password });
     const savedUser = await newUser.save();
-    res.status(201).json(savedUser);
+
+    const token = jwt.sign({ _id: savedUser._id }, process.env.JWT_SECRET);
+
+    res.json({ token, user: { _id: savedUser._id, name, email } });
   } catch (error) {
     console.error("Error creating user:", error);
     res

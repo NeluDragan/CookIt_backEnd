@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Recipe = require("../models/recipeModel");
 require("dotenv").config();
 
 exports.signIn = async (req, res) => {
@@ -106,5 +107,119 @@ exports.createUser = async (req, res) => {
     res
       .status(500)
       .json({ error: "Error creating user", details: error.message });
+  }
+};
+
+exports.authenticateUser = async (req, res) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    return res.status(401).json({ error: "Autentificare necesară." });
+  }
+  jwt.verify(token, "secret-key", (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: "Token invalid." });
+    }
+    req.user = user;
+    next();
+  });
+};
+
+exports.updateUser = async (req, res) => {
+  const { email } = req.params; // Modificați pentru a lua email din parametrii rutei sau din corpul cererii, în funcție de cerințe.
+
+  try {
+    // Validează și autentifică utilizatorul (de exemplu, prin verificarea tokenului).
+
+    // Găsește utilizatorul după email.
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Datele noi pentru actualizare.
+    const updatedUserData = req.body;
+
+    // Actualizează datele utilizatorului, similar cu funcția `updateRecipe`.
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      updatedUserData,
+      {
+        new: true,
+      }
+    );
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Eroare la actualizarea utilizatorului:", error);
+    res.status(500).json({ error: "Error updating user" });
+  }
+};
+
+exports.getFavoriteRecipes = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res.status(401).json({ error: "Autentificare necesară." });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const userId = decoded._id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Utilizatorul nu a fost găsit" });
+    }
+
+    const favoriteRecipeIds = user.favoriteRecipes;
+    const favoriteRecipes = await Recipe.find({
+      _id: { $in: favoriteRecipeIds },
+    });
+
+    res.status(200).json(favoriteRecipes);
+  } catch (err) {
+    res.status(500).json({ error: "Eroare la obținerea rețetelor favorite." });
+  }
+};
+
+exports.handleFavoriteRecipe = async (req, res) => {
+  const { recipeId } = req.body;
+  const token = req.headers.authorization;
+
+  try {
+    if (!token) {
+      return res.status(401).json({ error: "Autentificare necesară." });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const userId = decoded._id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilizatorul nu a fost găsit" });
+    }
+
+    if (user.favoriteRecipes.includes(recipeId)) {
+      const index = user.favoriteRecipes.indexOf(recipeId);
+      user.favoriteRecipes.splice(index, 1);
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: "Rețeta a fost eliminată din favorite cu succes." });
+    } else {
+      user.favoriteRecipes.push(recipeId);
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: "Rețeta a fost adăugată la favorite cu succes." });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Eroare la adăugarea/eliminarea rețetei la favorite." });
   }
 };

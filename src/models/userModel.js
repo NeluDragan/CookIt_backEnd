@@ -24,18 +24,18 @@ const userSchema = new mongoose.Schema(
       enum: ["USER", "ADMIN"],
       default: "USER",
     },
+    favoriteRecipes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }],
   },
+
   { collection: "User" }
 );
 
 userSchema.pre("save", async function (next) {
   const user = this;
-  console.log("Just before saving before hashing", user.password);
   if (!user.isModified("password")) {
     return next();
   }
   user.password = await bcrypt.hash(user.password, 8);
-  console.log("Just before saving after hashing", user.password);
   next();
 });
 

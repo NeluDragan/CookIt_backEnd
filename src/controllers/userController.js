@@ -125,12 +125,9 @@ exports.authenticateUser = async (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
-  const { email } = req.params; // Modificați pentru a lua email din parametrii rutei sau din corpul cererii, în funcție de cerințe.
+  const { email } = req.params;
 
   try {
-    // Validează și autentifică utilizatorul (de exemplu, prin verificarea tokenului).
-
-    // Găsește utilizatorul după email.
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -221,5 +218,25 @@ exports.handleFavoriteRecipe = async (req, res) => {
     res
       .status(500)
       .json({ error: "Eroare la adăugarea/eliminarea rețetei la favorite." });
+  }
+};
+
+exports.getUserByEmail = async (req, res) => {
+  const { userEmail } = req.params;
+
+  try {
+    const user = await User.findOne({ userEmail });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Exclude sensitive information if needed before sending the response
+    const { _id, name, email } = user;
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error fetching user information:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -125,19 +125,24 @@ exports.authenticateUser = async (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
-  const { email } = req.params;
+  const token = req.headers.authorization;
 
   try {
-    const user = await User.findOne({ email });
+    if (!token) {
+      return res.status(401).json({ error: "Autentificare necesară." });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const userId = decoded._id;
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Datele noi pentru actualizare.
     const updatedUserData = req.body;
 
-    // Actualizează datele utilizatorului, similar cu funcția `updateRecipe`.
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
       updatedUserData,
@@ -221,22 +226,29 @@ exports.handleFavoriteRecipe = async (req, res) => {
   }
 };
 
-exports.getUserByEmail = async (req, res) => {
-  const { userEmail } = req.params;
+exports.getUserByToken = async (req, res) => {
+  const token = req.headers.authorization;
 
   try {
-    const user = await User.findOne({ userEmail });
+    if (!token) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const userId = decoded._id;
+    const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: "User not found." });
     }
 
     // Exclude sensitive information if needed before sending the response
     const { _id, name, email } = user;
 
-    res.json(user);
+    res.json({ _id, name, email });
   } catch (error) {
     console.error("Error fetching user information:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Internal server error." });
   }
 };

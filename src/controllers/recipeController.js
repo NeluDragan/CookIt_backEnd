@@ -3,11 +3,20 @@ const User = require("../models/userModel");
 
 exports.getRecipes = async (req, res) => {
   try {
-    const recipes = await Recipe.find();
+    const { type } = req.query;
+
+    let recipes;
+
+    if (type) {
+      recipes = await Recipe.find({ type: type });
+    } else {
+      recipes = await Recipe.find();
+    }
+
     res.json(recipes);
   } catch (error) {
-    console.error("Eroare la obținerea retetelor:", error);
-    res.status(500).json({ error: "Eroare la obținerea retetelor" });
+    console.error("Error fetching recipes:", error);
+    res.status(500).json({ error: "Error fetching recipes" });
   }
 };
 

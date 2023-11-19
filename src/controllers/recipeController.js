@@ -1,5 +1,4 @@
 const Recipe = require("../models/recipeModel");
-const User = require("../models/userModel");
 
 exports.getRecipes = async (req, res) => {
   try {
@@ -27,7 +26,10 @@ exports.addRecipe = async (req, res) => {
 
     const newRecipe = new Recipe({
       name,
-      ingredients,
+      ingredients: ingredients.map((ingredient) => ({
+        id: ingredient.id,
+        quantity: ingredient.quantity,
+      })),
       preparationTime,
       instructions,
       createdBy,
@@ -43,7 +45,8 @@ exports.addRecipe = async (req, res) => {
 
 exports.updateRecipe = async (req, res) => {
   const { id } = req.params;
-  const updates = req.body; // Datele noi pentru actualizare
+  const updates = req.body;
+  console.log(updates);
 
   try {
     const updatedRecipe = await Recipe.findByIdAndUpdate(id, updates, {

@@ -6,5 +6,9 @@ router.get("/ingredient", IngredientController.getIngredients);
 router.post("/addIngredient", IngredientController.addIngredient);
 router.get("/getIngredientById/:id", IngredientController.getIngredientsById);
 router.post("/editIngredient/:id", IngredientController.updateIngredient);
+router.get(
+  "/getIngredientByName/:name",
+  IngredientController.getIngredientsByName
+);
 
 module.exports = router;

@@ -26,15 +26,26 @@ exports.getIngredientsById = async (req, res) => {
   }
 };
 
+exports.getIngredientsByName = async (req, res) => {
+  try {
+    const { name } = req.params;
+    const ingredients = await Ingredient.find({ name });
+
+    if (!ingredients || ingredients.length === 0) {
+      return res.status(404).json({ error: "Ingredient not found" });
+    }
+
+    res.json(ingredients);
+  } catch (error) {
+    console.error("Error fetching ingredient by name:", error);
+    res.status(500).json({ error: "Error fetching ingredient by name" });
+  }
+};
+
 exports.addIngredient = async (req, res) => {
   try {
-    const { name, unit, diet, photo, type } = req.body;
+    const { name, unit, diet, photo, type, nutritionalInfo } = req.body;
     console.log(req.body);
-    if (!diet) {
-      return res
-        .status(400)
-        .json({ error: "Name, unit, and diet are required." });
-    }
 
     const newIngredient = new Ingredient({
       name,
@@ -42,6 +53,7 @@ exports.addIngredient = async (req, res) => {
       diet,
       photo,
       type,
+      nutritionalInfo,
     });
 
     const savedIngredient = await newIngredient.save();

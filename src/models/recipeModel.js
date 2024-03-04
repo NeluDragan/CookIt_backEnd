@@ -10,11 +10,11 @@ const recipeSchema = new mongoose.Schema({
       id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Ingredient",
-        required: true,
+        required: false,
       },
       quantity: {
         type: Number,
-        required: true,
+        required: false,
       },
     },
   ],
@@ -46,6 +46,7 @@ const recipeSchema = new mongoose.Schema({
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+    required: false,
   },
   image: {
     type: String,

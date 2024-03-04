@@ -21,8 +21,15 @@ exports.getRecipes = async (req, res) => {
 
 exports.addRecipe = async (req, res) => {
   try {
-    const { name, ingredients, preparationTime, instructions, createdBy } =
-      req.body;
+    const {
+      name,
+      ingredients,
+      preparationTime,
+      instructions,
+      createdBy,
+      type,
+      image,
+    } = req.body;
 
     const newRecipe = new Recipe({
       name,
@@ -32,7 +39,9 @@ exports.addRecipe = async (req, res) => {
       })),
       preparationTime,
       instructions,
+      type,
       createdBy,
+      image,
     });
 
     const savedRecipe = await newRecipe.save();

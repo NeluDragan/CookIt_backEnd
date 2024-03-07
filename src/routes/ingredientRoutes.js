@@ -10,5 +10,6 @@ router.get(
   "/getIngredientByName/:name",
   IngredientController.getIngredientsByName
 );
+router.get("/getIngredientsName", IngredientController.getIngredientsName);
 
 module.exports = router;

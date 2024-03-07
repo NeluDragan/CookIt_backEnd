@@ -10,6 +10,16 @@ exports.getIngredients = async (req, res) => {
   }
 };
 
+exports.getIngredientsName = async (req, res) => {
+  try {
+    const ingredients = await Ingredient.find({}, { name: 1, _id: 0 });
+    res.json(ingredients);
+  } catch (error) {
+    console.error("Error fetching ingredients info:", error);
+    res.status(500).json({ error: "Error fetching ingredients info" });
+  }
+};
+
 exports.getIngredientsById = async (req, res) => {
   try {
     const { id } = req.params;

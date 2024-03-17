@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema(
       default: "USER",
     },
     favoriteRecipes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }],
+    createdRecipes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }],
   },
 
   { collection: "User" }

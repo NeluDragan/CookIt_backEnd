@@ -231,7 +231,7 @@ exports.getUserByToken = async (req, res) => {
 
   try {
     if (!token) {
-      return res.status(401).json({ error: "Authentication required." });
+      return res.status(401).json({ error: "Autentificare necesară." });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -240,15 +240,62 @@ exports.getUserByToken = async (req, res) => {
     const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(404).json({ error: "User not found." });
+      return res.status(404).json({ error: "Utilizatorul nu a fost găsit" });
     }
 
-    // Exclude sensitive information if needed before sending the response
     const { _id, name, email } = user;
 
     res.json({ _id, name, email });
   } catch (error) {
     console.error("Error fetching user information:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+exports.getUserRecipes = async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilizatorul nu a fost găsit" });
+    }
+
+    const userRecipes = await Recipe.find({ createdBy: userId });
+
+    res.status(200).json(userRecipes);
+  } catch (error) {
+    console.error("Error fetching user recipes:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+exports.handleUserRecipes = async (req, res) => {
+  const { userId, recipeId, action } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilizatorul nu a fost găsit" });
+    }
+
+    if (action === "add") {
+      user.createdRecipes.push(recipeId);
+    } else if (action === "remove") {
+      const index = user.recipes.indexOf(recipeId);
+      if (index !== -1) {
+        user.createdRecipes.splice(index, 1);
+      }
+    } else {
+      return res.status(400).json({ error: "Invalid action." });
+    }
+
+    await user.save();
+    res.status(200).json({ message: "User recipes updated successfully." });
+  } catch (error) {
+    console.error("Error updating user recipes:", error);
     res.status(500).json({ error: "Internal server error." });
   }
 };

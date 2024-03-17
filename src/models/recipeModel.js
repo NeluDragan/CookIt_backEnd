@@ -35,7 +35,7 @@ const recipeSchema = new mongoose.Schema({
       "Dinner",
       "Dessert",
       "Drinks",
-      "Altele",
+      "Other",
     ],
     required: false,
   },

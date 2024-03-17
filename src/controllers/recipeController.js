@@ -1,4 +1,5 @@
 const Recipe = require("../models/recipeModel");
+const User = require("../models/userModel");
 
 exports.getRecipes = async (req, res) => {
   try {
@@ -44,7 +45,15 @@ exports.addRecipe = async (req, res) => {
       image,
     });
 
+    if (!image) {
+      newRecipe.image =
+        "/Users/macbookpro/Desktop/CookIt/src/images/recipe/defaultimage.png";
+    }
+
     const savedRecipe = await newRecipe.save();
+    await User.findByIdAndUpdate(createdBy, {
+      $push: { favoriteRecipes: savedRecipe._id },
+    });
     res.json(savedRecipe);
   } catch (error) {
     console.error("Eroare la adăugarea retetei:", error);

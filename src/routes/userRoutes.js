@@ -11,5 +11,7 @@ router.post("/updateUser", userController.updateUser);
 router.get("/getFavoriteRecipes", userController.getFavoriteRecipes);
 router.post("/handleFavoriteRecipes", userController.handleFavoriteRecipe);
 router.get("/getUserByToken", userController.getUserByToken);
+router.get("/getUserRecipes", userController.getUserRecipes);
+router.post("/handleUserRecipes", userController.handleUserRecipes);
 
 module.exports = router;

@@ -5,7 +5,6 @@ function authenticateUser(req, res, next) {
   if (!token) {
     return res.status(401).json({ error: "Autentificare necesară." });
   }
-  console.log("token: " + token);
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).json({ error: "Token invalid." });

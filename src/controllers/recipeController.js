@@ -81,3 +81,18 @@ exports.updateRecipe = async (req, res) => {
     res.status(500).json({ error: "Eroare la actualizarea retetei" });
   }
 };
+
+exports.searchRecipes = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ error: "Query parameter is required" });
+    }
+
+    const regex = new RegExp(`${query}`, "i");
+    const recipes = await Recipe.find({ title: regex }, "name");
+    res.status(200).json(recipes);
+  } catch (error) {
+    res.status(500).json({ error: "Error searching recipes" });
+  }
+};

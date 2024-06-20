@@ -299,3 +299,27 @@ exports.handleUserRecipes = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
+exports.getUserRecipes = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+    if (!token) {
+      return res.status(401).json({ error: "Autentificare necesară." });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded._id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "Utilizatorul nu a fost găsit" });
+    }
+
+    const userRecipes = await Recipe.find({ createdBy: userId });
+    res.status(200).json(userRecipes);
+  } catch (error) {
+    console.error("Error fetching user recipes:", error);
+    res.status(500).json({ error: "Eroare la obținerea rețetelor favorite." });
+  }
+};
